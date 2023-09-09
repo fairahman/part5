@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+console.log('mui at App.jsx')
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import { LoginForm } from './components/LoginForm'
@@ -6,55 +7,40 @@ import axios from 'axios'
 import loginService from  './services/login'
 import { BlogForm } from './components/BlogForm'
 import { Message } from './components/Message'
+import { Toggleable } from './components/Toggleable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
- const [title, setTitle] = useState('')
- const [author, setAuthor] = useState('')
- const [url, setUrl] = useState('')
- const [message, setMessage] = useState(null)
- const [isVisible, setIsVisible] = useState(false)
+  const [message, setMessage] = useState(null)
+
+  const blogFormRef = useRef()
+
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+    const getAllBlogs = async () => {
+      console.log('my dumass is at the getAll useeffect rn')
+      const blogs = await blogService.getAll()
+      setBlogs( blogs.sort((a,b) => a.likes - b.likes) )
+    }
+    getAllBlogs()
   }, [])
 
   useEffect(() => {
-   const user =  window.localStorage.getItem('user') 
-   console.log(user)
-   if (user) setUser(JSON.parse(user))
+    const user =  window.localStorage.getItem('user')
+    //  console.log(user)
+    if (user) setUser(JSON.parse(user))
   }, [])
 
-  const handleUsernameChange = (event) => {
-    console.log(event.target.value)
-    setUsername(event.target.value)
-  }
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value)
-  }
-  const handleTitleChange = (event) => {
-    setTitle(event.target.value)
-  }
-  const handleUrlChange = (event) => {
-    setUrl(event.target.value)
-  }
-  const handleAuthorChange = (event) => {
-    setAuthor(event.target.value)
-  }
-  const handleLogin = async (event) => {
-    event.preventDefault()
+  console.log('blogs at App:', blogs)
+
+  const login = async (username, password) => {
+
     // need to pass username and password that should be set in the state
     try {
       const user = await loginService.login(username, password)
       console.log('useR', user)
       window.localStorage.setItem('user', JSON.stringify(user))
       setUser(user)
-      setUsername('')
-      setPassword('')
       setMessage(`Welcome! ${user.name || user.username}`)
       setTimeout(() => {
         setMessage(null)
@@ -67,55 +53,76 @@ const App = () => {
         setMessage(null)
       }, 5000)
     }
-    
-
   }
   const handleLogout = async () => {
     window.localStorage.removeItem('user')
     setUser(null)
   }
 
-  const handleBlogCreation = async (event) => {
-    event.preventDefault()
+  const addBlog = async (noteObj) => {
     try {
-      const newBlog = await blogService.create(title, author, url, user)
+      const newBlog = await blogService.create(noteObj, user)
       console.log('newBlog', newBlog)
+      blogFormRef.current.toggleVisibility()
       setBlogs([...blogs, newBlog])
       setMessage(`a new blog ${newBlog.title} has been added!`)
       setTimeout(() => setMessage(null), 5000)
-      setAuthor('')
-      setTitle('')
-      setUrl('')
     }
     catch(error) {
-      console.log(error.response)
+      console.log('error', error)
       // handling session timeout
       if (error.response.data.error === 'jwt expired') {
-        window.localStorage.removeItem('user') 
+        console.log('jwt expired at line 73')
+        window.localStorage.removeItem('user')
         setUser(null)
       }
-      
-    } 
+    }
+  }
+  const updateBlog = async (blog) => {
+    const updatedBlog = await blogService.update(blog)
+    console.log('updatedBlog:', updatedBlog)
+    setBlogs (
+      blogs
+        .map(blog => blog.title === updatedBlog.title ? updatedBlog : blog)
+        .sort((a, b) => a.likes - b.likes)
+    )
+  }
+
+  const handleDelete = async (blogId) => {
+    const theDeletedBlog = await blogService.deleteBlog(blogId, user)
+    if(theDeletedBlog.error === 'jwt expired') {
+      window.localStorage.removeItem('user')
+      setUser(null)
+    }
+    setBlogs(blogs.filter(blog => {
+      console.log('blog.title:', blog.title, 'theDeletedBlog.title:', theDeletedBlog.title )
+      return blog.title !== theDeletedBlog.title
+    }))
   }
   return (
     <div>
-      {user ? 
-      <div>
-        <h2>blogs</h2>
-        <Message message={message}/>
-        <h3>{user.username} logged in <button onClick={handleLogout}>logout</button></h3> 
-        <BlogForm isVisible={isVisible} setIsVisible={setIsVisible} handleBlogCreation={handleBlogCreation} handleTitleChange={handleTitleChange} handleUrlChange={handleUrlChange} handleAuthorChange={handleAuthorChange} title={title} url={url} author={author}/>
-        {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
-        )}
-      </div> : 
-      <div>
-        <Message message={message}/>
-        <LoginForm handleLogin={handleLogin} username={username} password={password} handleUsernameChange={handleUsernameChange} handlePasswordChange={handlePasswordChange}/>
-      </div>
+      {user ?
+        <div>
+          <h2>blogs</h2>
+          <Message message={message}/>
+          <h3>{user.username} logged in <button onClick={handleLogout}>logout</button></h3>
+
+          <Toggleable ref = {blogFormRef}  buttonLabel={'create new'}>
+            <BlogForm createBlog = {addBlog}/>
+          </Toggleable>
+
+          {blogs.map(blog =>
+            <Blog key={blog.id} blog={blog} updateBlog={updateBlog} handleDelete={handleDelete} />
+          )}
+        </div> :
+        <div>
+          <Message message={message}/>
+          <Toggleable buttonLabel={'login'}>
+            <LoginForm login={login}/>
+          </Toggleable>
+        </div>
       }
     </div>
-    
   )
 }
 

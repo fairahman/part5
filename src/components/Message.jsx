@@ -1,8 +1,8 @@
 import React from 'react'
 
-export const Message = ({message}) => {
+export const Message = ({ message }) => {
   // console.log('message:', message)
-  return ( 
+  return (
     <div>
       {message}
     </div>
