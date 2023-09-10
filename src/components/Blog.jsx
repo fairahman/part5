@@ -25,10 +25,10 @@ function Blog({ blog, updateBlog, handleDelete }) {
   const showWhenVisible = isVisible ? '' : 'none'
   return (
     <div style={blogStyle}>
-      {blog.title} {blog.author} <button onClick={toggleView}>{isVisible ? 'hide' : 'view'}</button> <br/>
-      <div style={{ display: showWhenVisible }}>
+      {blog.title} {blog.author} <button onClick={toggleView} data-testid='toggleBtn'>{isVisible ? 'hide' : 'view'}</button> <br/>
+      <div style={{ display: showWhenVisible }} data-testid='moreBlogInfo'>
         {blog.url}<br/>
-    likes {blog.likes} <button onClick={incrementLikes}>like</button><br/>
+        likes {blog.likes} <button onClick={incrementLikes}>like</button><br/>
         {blog.user.username}
         <button onClick={deleteBlog}>remove</button>
       </div>

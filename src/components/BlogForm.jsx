@@ -28,17 +28,30 @@ export const BlogForm = ({ createBlog }) => {
         <h2>Create new</h2>
         <div>
           <label htmlFor='title'>title</label>
-          <input type="text" id='title' onChange={handleTitleChange} value={title}/>
+          <input
+            type="text" id='title'
+            onChange={handleTitleChange}
+            value={title}
+            placeholder='write title'
+          />
         </div>
 
         <div>
           <label htmlFor='author'>author</label>
-          <input type="text" id='author' onChange={handleAuthorChange} value={author}/>
+          <input type="text" id='author'
+            onChange={handleAuthorChange}
+            value={author}
+            placeholder='write author name'
+          />
         </div>
 
         <div>
           <label htmlFor='url'>url</label>
-          <input type="text" id='url' onChange={handleUrlChange} value={url}/>
+          <input type="text" id='url'
+            onChange={handleUrlChange}
+            value={url}
+            placeholder='write URL'
+          />
         </div>
         <button>create</button>
       </form>
