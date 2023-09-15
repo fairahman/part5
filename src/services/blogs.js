@@ -11,6 +11,7 @@ const  getAll = async () => {
 const create = async (noteObj, user) => {
   console.log(noteObj)
   console.log('kitaa')
+  console.log('user:', user)
   try {
     const response =  await axios.post(baseUrl, noteObj, { headers: { Authorization:`Bearer ${user.token}` } })
     console.log('response.data:', response.data)

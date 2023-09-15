@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function Blog({ blog, updateBlog, handleDelete }) {
+function Blog({ blog, updateBlog, handleDelete, user }) {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -24,13 +24,13 @@ function Blog({ blog, updateBlog, handleDelete }) {
   }
   const showWhenVisible = isVisible ? '' : 'none'
   return (
-    <div style={blogStyle}>
+    <div className='blog' style={blogStyle}>
       {blog.title} {blog.author} <button onClick={toggleView} data-testid='toggleBtn'>{isVisible ? 'hide' : 'view'}</button> <br/>
       <div style={{ display: showWhenVisible }} data-testid='moreBlogInfo'>
         {blog.url}<br/>
         likes {blog.likes} <button onClick={incrementLikes}>like</button><br/>
-        {blog.user.username}
-        <button onClick={deleteBlog}>remove</button>
+        {blog.user.username}<br/>
+        {blog.user.username === user.username ?<button onClick={deleteBlog}>remove</button> : null}
       </div>
 
     </div>)

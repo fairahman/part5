@@ -18,7 +18,6 @@ const App = () => {
 
   useEffect(() => {
     const getAllBlogs = async () => {
-      console.log('my dumass is at the getAll useeffect rn')
       const blogs = await blogService.getAll()
       setBlogs( blogs.sort((a,b) => a.likes - b.likes) )
     }
@@ -81,10 +80,12 @@ const App = () => {
   const updateBlog = async (blog) => {
     const updatedBlog = await blogService.update(blog)
     console.log('updatedBlog:', updatedBlog)
-    setBlogs (
-      blogs
-        .map(blog => blog.title === updatedBlog.title ? updatedBlog : blog)
-        .sort((a, b) => a.likes - b.likes)
+    const updatedBlogs = blogs
+      .map(blog => blog.title === updatedBlog.title ? updatedBlog : blog)
+    console.log('updatedBlogs:', updatedBlogs)
+    const updatedSortedBlogs = updatedBlogs.sort((a, b) => b.likes - a.likes)
+      setBlogs (
+      updatedSortedBlogs
     )
   }
 
@@ -93,11 +94,14 @@ const App = () => {
     if(theDeletedBlog.error === 'jwt expired') {
       window.localStorage.removeItem('user')
       setUser(null)
+      return 
     }
     setBlogs(blogs.filter(blog => {
       console.log('blog.title:', blog.title, 'theDeletedBlog.title:', theDeletedBlog.title )
       return blog.title !== theDeletedBlog.title
     }))
+    setMessage(`Successfully deleted ${theDeletedBlog.title} `)
+    setTimeout(() => setMessage(null), 5000)
   }
   return (
     <div>
@@ -112,7 +116,7 @@ const App = () => {
           </Toggleable>
 
           {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} updateBlog={updateBlog} handleDelete={handleDelete} />
+            <Blog key={blog.id} blog={blog} updateBlog={updateBlog} handleDelete={handleDelete} user={user} />
           )}
         </div> :
         <div>

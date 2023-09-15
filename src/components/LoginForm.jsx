@@ -22,13 +22,13 @@ export const LoginForm = ({ login }) => {
     <form onSubmit={handleLogin}>
       <div>
         <label htmlFor="username">username</label>
-        <input onChange={handleUsernameChange} type="text" id='username' value = {username}/>
+        <input id ='username' onChange={handleUsernameChange} type="text"  value = {username}/>
       </div>
       <div>
         <label htmlFor='password'>password</label>
         <input onChange={handlePasswordChange} type='text' id='password' value={password}/>
       </div>
-      <button>submit</button>
+      <button id="login-button" type='submit'>submit</button>
     </form>
   )
 }
